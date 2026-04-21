@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">NeuroLearn</string>
+    <string name="task_header_1">Generated Task 1</string>
+    <string name="task_desc">Small Description for the generated Task</string>
+    <string name="prompt_placeholder">Prompt will appear here...</string>
+    <string name="response_placeholder">AI Response will appear here...</string>
+    <string name="btn_generate_hint">Generate Hint</string>
+    <string name="btn_explain_logic">Explain Answer</string>
+    <string name="btn_submit">Submit</string>
+</resources>
