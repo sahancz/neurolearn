@@ -18,9 +18,19 @@ class DashboardActivity : AppCompatActivity() {
 
         welcomeText.text = "Hello, Sahan"
 
+        //  Grab the interests picked from InterestsActivity
+        val userInterests = intent.getStringArrayListExtra("USER_INTERESTS")
+
+        // Default to Neural Networks if no selection, otherwise use the given choice
+        val selectedTopic = if (!userInterests.isNullOrEmpty()) userInterests[0] else "Neural Networks"
+
+        // Update the UI to show personalized topic
+        taskTitle.text = "$selectedTopic Task"
+
         taskCard.setOnClickListener {
             val intent = Intent(this, TaskDetailActivity::class.java)
-            intent.putExtra("TASK_NAME", "Generated Task 1")
+            // Pass the chosen topic to the AI screen
+            intent.putExtra("TASK_TOPIC", selectedTopic)
             startActivity(intent)
         }
     }

@@ -6,6 +6,8 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.ai.client.generativeai.GenerativeModel
+import io.noties.markwon.Markwon
 import kotlinx.coroutines.launch
 
 class TaskDetailActivity : AppCompatActivity() {
@@ -16,51 +18,95 @@ class TaskDetailActivity : AppCompatActivity() {
     private lateinit var btnGetHint: Button
     private lateinit var btnExplain: Button
     private lateinit var btnSubmit: Button
+    private lateinit var etStudentAnswer: EditText
+
+    private lateinit var markwon: Markwon
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_detail)
 
-        // Matching these exactly to your XML IDs
         tvPrompt = findViewById(R.id.tv_llm_prompt)
         tvResponse = findViewById(R.id.tv_llm_response)
         progressBar = findViewById(R.id.pb_loading)
         btnGetHint = findViewById(R.id.btn_generate_hint)
         btnExplain = findViewById(R.id.btn_explain_logic)
         btnSubmit = findViewById(R.id.btn_submit_task)
+        etStudentAnswer = findViewById(R.id.et_student_answer)
 
-        // Initial task generation for demo
-        executeLLMTask("Generate an introductory task for Neural Networks.")
+        markwon = Markwon.create(this)
+
+
+        val topic = intent.getStringExtra("TASK_TOPIC") ?: "Neural Networks"
+
+        executeLLMTask(
+            displayPrompt = "Generating introductory task for $topic.",
+            apiPrompt = "Act as an AI tutor. Generate a very brief introductory task for a student learning about $topic."
+        )
 
         btnGetHint.setOnClickListener {
-            executeLLMTask("Provide a subtle hint for the question: What is a Neural Network?")
+            executeLLMTask(
+                displayPrompt = "Requesting a hint...",
+                apiPrompt = "Act as a tutor. Provide a subtle hint for the introductory task about $topic. Do not give the direct answer, just a nudge."
+            )
         }
 
         btnExplain.setOnClickListener {
-            executeLLMTask("Explain why 'Backpropagation' is the correct method for training weights.")
+            val studentAnswer = etStudentAnswer.text.toString().trim()
+
+            if (studentAnswer.isEmpty()) {
+                Toast.makeText(this, "Please type an answer first so the tutor can evaluate it!", Toast.LENGTH_SHORT).show()
+            } else {
+                executeLLMTask(
+                    displayPrompt = "Evaluating your answer...",
+                    apiPrompt = "Act as an AI tutor. The student is learning about $topic. They typed this answer: '$studentAnswer'. If their answer is completely off-topic or a random word, gently tell them to stay focused on $topic. If it is on-topic, explain why it is conceptually correct or incorrect. Keep it under 3 sentences."
+                )
+            }
         }
 
         btnSubmit.setOnClickListener {
-            val intent = Intent(this, ResultsActivity::class.java)
-            startActivity(intent)
+            val studentAnswer = etStudentAnswer.text.toString().trim()
+            // NEW: Grab the actual question the AI asked from the TextView!
+            val originalTask = tvResponse.text.toString()
+
+            if (studentAnswer.isEmpty()) {
+                Toast.makeText(this, "Please type an answer first!", Toast.LENGTH_SHORT).show()
+            } else {
+                val intent = Intent(this, ResultsActivity::class.java)
+                intent.putExtra("STUDENT_ANSWER", studentAnswer)
+                intent.putExtra("TASK_TOPIC", topic)
+                // NEW: Pass the original task to the Results screen
+                intent.putExtra("ORIGINAL_TASK", originalTask)
+                startActivity(intent)
+            }
+
+
         }
     }
 
-    private fun executeLLMTask(prompt: String) {
+    private fun executeLLMTask(displayPrompt: String, apiPrompt: String) {
+
         progressBar.visibility = View.VISIBLE
-        tvPrompt.text = "Prompt: $prompt"
-        tvResponse.text = ""
+        tvPrompt.text = "Action: $displayPrompt"
+        tvResponse.text = "Thinking..."
 
         lifecycleScope.launch {
             try {
-                // Manual delay to demonstrate loading state
-                kotlinx.coroutines.delay(1500)
+                val generativeModel = GenerativeModel(
+                    modelName = "gemini-2.5-flash",
+                    apiKey = "AIzaSyAL8xlgRMeFekXwzzzEMld1Hn0CXfHc6js"
+                )
+
+                val response = generativeModel.generateContent(apiPrompt)
+
                 progressBar.visibility = View.GONE
-                tvResponse.text = "AI Response: This is a simulated AI response tailored to your interests in AI."
+
+                markwon.setMarkdown(tvResponse, "**AI Response:**\n\n${response.text}")
+
             } catch (e: Exception) {
                 progressBar.visibility = View.GONE
-                tvResponse.text = "Error: Failed to connect to LLM backend."
-                Toast.makeText(this@TaskDetailActivity, "Connection Failed", Toast.LENGTH_SHORT).show()
+                tvResponse.text = "Error: Failed to connect to LLM. ${e.localizedMessage}"
+                Toast.makeText(this@TaskDetailActivity, "API Connection Failed", Toast.LENGTH_SHORT).show()
             }
         }
     }

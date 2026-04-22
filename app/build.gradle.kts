@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.material)
     implementation(libs.androidx.cardview)
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation("io.noties.markwon:core:4.6.2")
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.kotlinx.coroutines.android)
