@@ -18,10 +18,10 @@ class DashboardActivity : AppCompatActivity() {
 
         welcomeText.text = "Hello, Sahan"
 
-        //  Grab the interests picked from InterestsActivity
+        //  grab innterests picked from InterestsActivity
         val userInterests = intent.getStringArrayListExtra("USER_INTERESTS")
 
-        // Default to Neural Networks if no selection, otherwise use the given choice
+        // Default to neural networks if no selection, otherwise use the given choice
         val selectedTopic = if (!userInterests.isNullOrEmpty()) userInterests[0] else "Neural Networks"
 
         // Update the UI to show personalized topic

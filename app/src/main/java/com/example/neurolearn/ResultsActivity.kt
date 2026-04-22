@@ -30,7 +30,7 @@ class ResultsActivity : AppCompatActivity() {
 
         val studentAnswer = intent.getStringExtra("STUDENT_ANSWER") ?: "No answer provided."
         val topic = intent.getStringExtra("TASK_TOPIC") ?: "Neural Networks"
-        // NEW: Grab the task!
+
         val originalTask = intent.getStringExtra("ORIGINAL_TASK") ?: "No task provided."
 
         resultSummary.text = "Evaluating your task on $topic..."
