@@ -21,7 +21,7 @@ class TaskDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_detail)
 
-        // Matching these exactly to your XML IDs
+        
         tvPrompt = findViewById(R.id.tv_llm_prompt)
         tvResponse = findViewById(R.id.tv_llm_response)
         progressBar = findViewById(R.id.pb_loading)
@@ -29,7 +29,7 @@ class TaskDetailActivity : AppCompatActivity() {
         btnExplain = findViewById(R.id.btn_explain_logic)
         btnSubmit = findViewById(R.id.btn_submit_task)
 
-        // Initial task generation for demo
+        //LLM Tasks
         executeLLMTask("Generate an introductory task for Neural Networks.")
 
         btnGetHint.setOnClickListener {
